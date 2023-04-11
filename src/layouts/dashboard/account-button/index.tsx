@@ -4,9 +4,11 @@ import { Avatar, Box, ButtonBase, SvgIcon } from '@mui/material';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { usePopover } from 'src/hooks/use-popover';
 import { AccountPopover } from './account-popover';
+import { useAuth } from 'src/hooks/use-auth';
 
 export const AccountButton: FC = () => {
-  const user = useMockedUser();
+  // const user = useMockedUser();
+  const {user} = useAuth()
   const popover = usePopover<HTMLButtonElement>();
 
   return (
@@ -31,7 +33,7 @@ export const AccountButton: FC = () => {
             height: 32,
             width: 32
           }}
-          src={user.avatar}
+          src={user?.iss}
         >
           <SvgIcon>
             <User01Icon />

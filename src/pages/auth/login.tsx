@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
-import type { AuthContextType } from 'src/contexts/auth/auth-context';
+import { ActionType, type AuthContextType } from 'src/contexts/auth/auth-context';
 import { GuestGuard } from 'src/guards/guest-guard';
 import { IssuerGuard } from 'src/guards/issuer-guard';
 import { useAuth } from 'src/hooks/use-auth';
@@ -26,6 +26,8 @@ import { paths } from 'src/paths';
 import { AuthIssuer } from 'src/sections/auth/auth-issuer';
 import type { Page as PageType } from 'src/types/page';
 import { Issuer } from 'src/utils/auth';
+import { useDispatch } from '../../store/index';
+import { useRouter } from 'next/router';
 
 interface Values {
   email: string;
@@ -56,16 +58,18 @@ const Page: PageType = () => {
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo');
   const { issuer, signIn } = useAuth<AuthContextType>();
+  const router = useRouter();
+
   const formik = useFormik({
     initialValues,
     validationSchema,
     onSubmit: async (values, helpers): Promise<void> => {
       try {
         await signIn(values.email, values.password);
-
         if (isMounted()) {
           // returnTo could be an absolute path
-          window.location.href = returnTo || paths.dashboard.index;
+          // window.location.href = returnTo || paths.dashboard.index;
+          router.push(returnTo || paths.dashboard.index);
         }
       } catch (err) {
         console.error(err);

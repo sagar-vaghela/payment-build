@@ -30,6 +30,7 @@ import { SocialConnections } from 'src/sections/dashboard/social/social-connecti
 import { SocialTimeline } from 'src/sections/dashboard/social/social-timeline';
 import type { Page as PageType } from 'src/types/page';
 import type { Connection, Post, Profile } from 'src/types/social';
+import { useAuth } from 'src/hooks/use-auth';
 
 const tabs = [
   { label: 'Timeline', value: 'timeline' },
@@ -122,9 +123,10 @@ const useConnections = (search: string = ''): Connection[] => {
 };
 
 export const Page: PageType = () => {
-  const profile = useProfile();
   const [currentTab, setCurrentTab] = useState<string>('timeline');
   const [status, setStatus] = useState<string>('not_connected');
+  const profile = useProfile();
+  const {user} = useAuth();
   const posts = usePosts();
   const [connectionsQuery, setConnectionsQuery] = useState<string>('');
   const connections = useConnections(connectionsQuery);
@@ -235,7 +237,7 @@ export const Page: PageType = () => {
                 spacing={2}
               >
                 <Avatar
-                  src={profile.avatar}
+                  src={user?.iss}
                   sx={{
                     height: 64,
                     width: 64
@@ -246,10 +248,10 @@ export const Page: PageType = () => {
                     color="text.secondary"
                     variant="overline"
                   >
-                    {profile.bio}
+                    {}
                   </Typography>
                   <Typography variant="h6">
-                    {profile.name}
+                    {user?.email?.split('.')[0]}
                   </Typography>
                 </div>
               </Stack>
