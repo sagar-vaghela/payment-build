@@ -26,7 +26,7 @@ if(access_token){
     ...config,
     ...headers
   }
-  debugger
+  
 }
 
 export const createAxiosFor = axios.create(config);
