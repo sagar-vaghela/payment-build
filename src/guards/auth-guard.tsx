@@ -7,10 +7,7 @@ import { paths } from 'src/paths';
 import { Issuer } from 'src/utils/auth';
 
 const loginPaths: Record<Issuer, string> = {
-  [Issuer.Amplify]: paths.auth.amplify.login,
-  [Issuer.Auth0]: paths.auth.auth0.login,
-  [Issuer.Firebase]: paths.auth.firebase.login,
-  [Issuer.JWT]: paths.auth.jwt.login
+  [Issuer.Auth]: paths.auth.login
 };
 
 interface AuthGuardProps {

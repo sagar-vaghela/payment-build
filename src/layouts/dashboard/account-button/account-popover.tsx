@@ -22,6 +22,7 @@ import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { useRouter } from 'src/hooks/use-router';
 import { paths } from 'src/paths';
 import { Issuer } from 'src/utils/auth';
+import { useSelector } from 'react-redux';
 
 interface AccountPopoverProps {
   anchorEl: null | Element;
@@ -33,7 +34,9 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
   const { anchorEl, onClose, open, ...other } = props;
   const router = useRouter();
   const auth = useAuth();
-  const user = useMockedUser();
+  // const user = useMockedUser();
+
+  console.log('auth',auth );
 
   const handleLogout = useCallback(
     async (): Promise<void> => {
@@ -41,22 +44,7 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
         onClose?.();
 
         switch (auth.issuer) {
-          case Issuer.Amplify: {
-            await auth.signOut();
-            break;
-          }
-
-          case Issuer.Auth0: {
-            await auth.logout();
-            break;
-          }
-
-          case Issuer.Firebase: {
-            await auth.signOut();
-            break;
-          }
-
-          case Issuer.JWT: {
+          case Issuer.Auth: {
             await auth.signOut();
             break;
           }
@@ -66,7 +54,7 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
           }
         }
 
-        router.push(paths.index);
+        router.push(paths.auth.login);
       } catch (err) {
         console.error(err);
         toast.error('Something went wrong!');
@@ -90,13 +78,13 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
     >
       <Box sx={{ p: 2 }}>
         <Typography variant="body1">
-          {user.name}
+          {auth?.user?.email?.split('.')[0]}
         </Typography>
         <Typography
           color="text.secondary"
           variant="body2"
         >
-          demo@devias.io
+          {auth?.user?.email}
         </Typography>
       </Box>
       <Divider />

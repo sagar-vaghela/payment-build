@@ -5,12 +5,21 @@ import { authApi } from 'src/api/auth';
 import type { User } from 'src/types/user';
 import { Issuer } from 'src/utils/auth';
 
-const STORAGE_KEY = 'accessToken';
+const ACCESS_TOKEN_KEY = 'access_token';
+const USER_KEY = 'user';
+const TOKEN_KEY = 'token';
 
+interface Token {
+  access_token : string,
+  expires_in: string,
+  refresh_token: string
+}
 interface State {
   isInitialized: boolean;
   isAuthenticated: boolean;
   user: User | null;
+  // access_token: string | null;
+  token: Token; // ahi type nakhjo
 }
 
 enum ActionType {
@@ -24,14 +33,18 @@ type InitializeAction = {
   type: ActionType.INITIALIZE;
   payload: {
     isAuthenticated: boolean;
-    user: User | null;
+    user: User | null; // ahi nakhjo types
+    // access_token: string | null;
+    token: Token // ahi nakhjo types
   };
 };
 
 type SignInAction = {
   type: ActionType.SIGN_IN;
   payload: {
-    user: User;
+    user: User; // ahi nakhjo types
+    // access_token: string;
+    token: Token // ahi nakhjo types
   };
 };
 
@@ -57,7 +70,13 @@ type Handler = (state: State, action: any) => State;
 const initialState: State = {
   isAuthenticated: false,
   isInitialized: false,
-  user: null
+  user: null,
+  token: {
+    access_token: '',
+    expires_in:'',
+    refresh_token :''
+  },
+  // access_token: null
 };
 
 const handlers: Record<ActionType, Handler> = {
@@ -72,12 +91,13 @@ const handlers: Record<ActionType, Handler> = {
     };
   },
   SIGN_IN: (state: State, action: SignInAction): State => {
-    const { user } = action.payload;
+    const { user, token } = action.payload;
 
     return {
       ...state,
       isAuthenticated: true,
-      user
+      user,
+      token,
     };
   },
   SIGN_UP: (state: State, action: SignUpAction): State => {
@@ -101,7 +121,7 @@ const reducer = (state: State, action: Action): State => (
 );
 
 export interface AuthContextType extends State {
-  issuer: Issuer.JWT;
+  issuer: Issuer.Auth;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, name: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -109,7 +129,7 @@ export interface AuthContextType extends State {
 
 export const AuthContext = createContext<AuthContextType>({
   ...initialState,
-  issuer: Issuer.JWT,
+  issuer: Issuer.Auth,
   signIn: () => Promise.resolve(),
   signUp: () => Promise.resolve(),
   signOut: () => Promise.resolve()
@@ -126,16 +146,17 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
   const initialize = useCallback(
     async (): Promise<void> => {
       try {
-        const accessToken = window.sessionStorage.getItem(STORAGE_KEY);
+        const access_token = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+        const token = JSON.parse(window.localStorage.getItem(TOKEN_KEY) || '');
+        const user: User | null = JSON.parse(window.localStorage.getItem(USER_KEY) || '');
 
-        if (accessToken) {
-          const user = await authApi.me({ accessToken });
-
+        if (access_token && token && user) {
           dispatch({
             type: ActionType.INITIALIZE,
             payload: {
               isAuthenticated: true,
-              user
+              user,
+              token,
             }
           });
         } else {
@@ -143,7 +164,12 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
             type: ActionType.INITIALIZE,
             payload: {
               isAuthenticated: false,
-              user: null
+              user: null,
+              token: {
+                access_token: '',
+                expires_in:'',
+                refresh_token :''
+              },
             }
           });
         }
@@ -153,7 +179,12 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
           type: ActionType.INITIALIZE,
           payload: {
             isAuthenticated: false,
-            user: null
+            user: null,
+            token: {
+              access_token: '',
+              expires_in:'',
+              refresh_token :''
+            },
           }
         });
       }
@@ -171,15 +202,17 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const signIn = useCallback(
     async (email: string, password: string): Promise<void> => {
-      const { accessToken } = await authApi.signIn({ email, password });
-      const user = await authApi.me({ accessToken });
+      const { access_token, user, token }: any = await authApi.signIn({ email, password });
 
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
+      localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
+      localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
 
       dispatch({
         type: ActionType.SIGN_IN,
         payload: {
-          user
+          user,
+          token
         }
       });
     },
@@ -188,10 +221,10 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const signUp = useCallback(
     async (email: string, name: string, password: string): Promise<void> => {
-      const { accessToken } = await authApi.signUp({ email, name, password });
-      const user = await authApi.me({ accessToken });
+      const { access_token } = await authApi.signUp({ email, name, password });
+      const user = await authApi.me({ access_token });
 
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
+      localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
 
       dispatch({
         type: ActionType.SIGN_UP,
@@ -205,7 +238,9 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const signOut = useCallback(
     async (): Promise<void> => {
-      sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(TOKEN_KEY);
       dispatch({ type: ActionType.SIGN_OUT });
     },
     [dispatch]
@@ -215,7 +250,7 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     <AuthContext.Provider
       value={{
         ...state,
-        issuer: Issuer.JWT,
+        issuer: Issuer.Auth,
         signIn,
         signUp,
         signOut
