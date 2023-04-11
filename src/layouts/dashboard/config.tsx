@@ -104,6 +104,78 @@ export const useSections = () => {
                   <HomeSmileIcon />
                 </SvgIcon>
               )
+            },
+            {
+              title: t(tokens.nav.products),
+              path: paths.dashboard.product,
+              icon: (
+                <SvgIcon fontSize="small">
+                  <ShoppingBag03Icon />
+                </SvgIcon>
+              ),
+              items: [
+                {
+                  title: t(tokens.nav.assets),
+                  path: paths.dashboard.product.index
+                },
+                {
+                  title: t(tokens.nav.expired),
+                  path: paths.dashboard.product.expired
+                },
+                {
+                  title: t(tokens.nav.deleted),
+                  path: paths.dashboard.product.deleted
+                },
+                {
+                  title: t(tokens.nav.all),
+                  path: paths.dashboard.product.all
+                }
+              ]
+            },
+            {
+              title: t(tokens.nav.profilename),
+              path: paths.dashboard.profile,
+              icon: (
+                <SvgIcon fontSize="small">
+                  <Users03Icon />
+                </SvgIcon>
+              )
+              },
+            {
+              title: t(tokens.nav.sales),
+              path: paths.dashboard.sales,
+              icon: (
+                <SvgIcon fontSize="small">
+                  <ShoppingCart01Icon />
+                </SvgIcon>
+              ),
+              items: [
+                {
+                  title: t(tokens.nav.productsname),
+                  path: paths.dashboard.sales.index
+                },
+                {
+                  title: t(tokens.nav.subscriptions),
+                  path: paths.dashboard.sales.subscription
+                },
+                {
+                  title: t(tokens.nav.customersname),
+                  path: paths.dashboard.sales.customers
+                },
+                {
+                  title: t(tokens.nav.newclient),
+                  path: paths.dashboard.sales.newclient
+                }
+              ]
+            },
+            {
+              title: t(tokens.nav.settings),
+              path: paths.dashboard.settings,
+              icon: (
+                <SvgIcon fontSize="small">
+                  <Lock01Icon />
+                </SvgIcon>
+              )
             }
           ]
         },

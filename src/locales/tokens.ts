@@ -49,6 +49,18 @@ export const tokens = {
     register: 'nav.register',
     resetPassword: 'nav.resetPassword',
     socialMedia: 'nav.socialMedia',
-    verifyCode: 'nav.verifyCode'
+    verifyCode: 'nav.verifyCode',
+    products : 'Products',
+    assets: 'Assets',
+    expired: 'expired',
+    deleted: 'Deleted',
+    all: 'All',
+    profilename:'profile',
+    sales:'Sales',
+    productsname:'Products',
+    subscriptions:'subscriptions',
+    customersname:'Customers',
+    newclient:'New client',
+    settings:'settings',
   }
 };

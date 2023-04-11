@@ -43,6 +43,20 @@ export const paths = {
       postDetails: '/dashboard/blog/:postId',
       postCreate: '/dashboard/blog/create'
     },
+    product:{
+      index:'/dashboard/product',
+      expired: '/dashboard/product/expired',
+      deleted: '/dashboard/product/deleted',
+      all: '/dashboard/product/all'
+    },
+    profile:'/dashboard/profile',
+    sales:{
+      index:'/dashboard/sales',
+      subscription:'/dashboard/sales/subscription',
+      customers:'/dashboard/sales/customers',
+      newclient:'/dashboard/sales/newclient'
+    },
+    settings:'/dashboard/settings',
     calendar: '/dashboard/calendar',
     chat: '/dashboard/chat',
     crypto: '/dashboard/crypto',
