@@ -3,15 +3,19 @@ import { createResourceId } from 'src/utils/create-resource-id';
 import { wait } from 'src/utils/wait';
 import { users } from './data';
 import { createAxiosFor } from 'src/services/axios';
+import { loginUrl } from 'src/services/api';
 
-const STORAGE_KEY: string = 'users';
+const ACCESS_TOKEN_KEY = 'access_token';
+const USER_KEY = 'user';
+const TOKEN_KEY = 'token';
+
 
 // NOTE: We use sessionStorage since memory storage is lost after page reload.
 //  This should be replaced with a server call that returns DB persisted data.
 
 const getPersistedUsers = (): User[] => {
   try {
-    const data = sessionStorage.getItem(STORAGE_KEY);
+    const data = sessionStorage.getItem(ACCESS_TOKEN_KEY);
 
     if (!data) {
       return [];
@@ -28,7 +32,7 @@ const persistUser = (user: User): void => {
   try {
     const users = getPersistedUsers();
     const data = JSON.stringify([...users, user]);
-    sessionStorage.setItem(STORAGE_KEY, data);
+    sessionStorage.setItem(ACCESS_TOKEN_KEY, data);
   } catch (err) {
     console.error(err);
   }
@@ -40,7 +44,9 @@ type SignInRequest = {
 }
 
 type SignInResponse = Promise<{
-  accessToken: string;
+  user: User | null;
+  access_token: string | null;
+  token: any | null; // ahi type nakhjo
 }>;
 
 type SignUpRequest = {
@@ -50,14 +56,10 @@ type SignUpRequest = {
 }
 
 type SignUpResponse = Promise<{
-  accessToken: string;
+  access_token: string;
 }>;
 
-type MeRequest = {
-  accessToken: string
-};
-
-type MeResponse = Promise<User>;
+const { NEXT_PUBLIC_API_URL } = process.env;
 
 class AuthApi {
   async signIn(request: SignInRequest): SignInResponse {
@@ -69,16 +71,11 @@ class AuthApi {
 
     return new Promise((resolve, reject) => {
       try {
+        // ane fix karo like below je error ave che
+        // createAxiosFor.post(loginUrl, payload).then(function (response) {
         createAxiosFor.post(`https://europe-west1-tipsterpage-1a852.cloudfunctions.net/apiv1/auth/login`,payload).then(function (response) {
-          const { payload: user, token} = response.data;
-          // Create the access token
-          const accessToken: any = {
-            user, token, access_token: token.access_token
-          };
-
-          // const accessToken: any = token.access_token;
-
-          resolve({ accessToken });
+          const { payload: user, token, token: { access_token }}: any = response.data;
+          resolve({ user, token, access_token });
         })
 
       } catch (err) {
@@ -88,42 +85,6 @@ class AuthApi {
     });
   }
  
-  // async signIn(request: SignInRequest): SignInResponse {
-  //   const { email, password } = request;
-
-  //   await wait(500);
-
-  //   return new Promise((resolve, reject) => {
-  //     try {
-  //       // Merge static users (data file) with persisted users (browser storage)
-  //       const mergedUsers = [
-  //         ...users,
-  //         ...getPersistedUsers()
-  //       ];
-
-  //       // Find the user
-  //       const user = mergedUsers.find((user) => user.email === email);
-
-  //       if (!user || (user.password !== password)) {
-  //         reject(new Error('Please check your email and password'));
-  //         return;
-  //       }
-
-  //       // Create the access token
-  //       const accessToken = sign(
-  //         { userId: user.id },
-  //         JWT_SECRET,
-  //         { expiresIn: JWT_EXPIRES_IN }
-  //       );
-
-  //       resolve({ accessToken });
-  //     } catch (err) {
-  //       console.error('[Auth Api]: ', err);
-  //       reject(new Error('Internal server error'));
-  //     }
-  //   });
-  // }
-
   async signUp(request: SignUpRequest): SignUpResponse {
     const { email, name, password } = request;
 
@@ -156,13 +117,13 @@ class AuthApi {
 
         persistUser(user);
 
-        // const accessToken = sign(
+        // const access_token = sign(
         //   { userId: user.id },
         //   JWT_SECRET,
         //   { expiresIn: JWT_EXPIRES_IN }
         // );
 
-        resolve({ accessToken: '' });
+        resolve({ access_token: '' });
       } catch (err) {
         console.error('[Auth Api]: ', err);
         reject(new Error('Internal server error'));

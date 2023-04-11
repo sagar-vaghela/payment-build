@@ -30,5 +30,5 @@ export const mapboxConfig = {
 };
 
 export const apiConfig = {
-  apiUrl: process.env.NEXT_APP_API_URL
+  apiUrl: process.env.NEXT_PUBLIC_API_URL
 };

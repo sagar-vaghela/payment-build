@@ -5,12 +5,16 @@ import { authApi } from 'src/api/auth';
 import type { User } from 'src/types/user';
 import { Issuer } from 'src/utils/auth';
 
-const STORAGE_KEY = 'accessToken';
+const ACCESS_TOKEN_KEY = 'access_token';
+const USER_KEY = 'user';
+const TOKEN_KEY = 'token';
 
 interface State {
   isInitialized: boolean;
   isAuthenticated: boolean;
   user: User | null;
+  access_token: string | null;
+  token: any; // ahi type nakhjo
 }
 
 enum ActionType {
@@ -24,14 +28,18 @@ type InitializeAction = {
   type: ActionType.INITIALIZE;
   payload: {
     isAuthenticated: boolean;
-    user: User | null;
+    user: User | null; // ahi nakhjo types
+    access_token: string | null;
+    token: any // ahi nakhjo types
   };
 };
 
 type SignInAction = {
   type: ActionType.SIGN_IN;
   payload: {
-    user: User;
+    user: User; // ahi nakhjo types
+    access_token: string;
+    token: any // ahi nakhjo types
   };
 };
 
@@ -57,7 +65,9 @@ type Handler = (state: State, action: any) => State;
 const initialState: State = {
   isAuthenticated: false,
   isInitialized: false,
-  user: null
+  user: null,
+  token: null,
+  access_token: null
 };
 
 const handlers: Record<ActionType, Handler> = {
@@ -72,12 +82,14 @@ const handlers: Record<ActionType, Handler> = {
     };
   },
   SIGN_IN: (state: State, action: SignInAction): State => {
-    const { user } = action.payload;
+    const { user, token, access_token } = action.payload;
 
     return {
       ...state,
       isAuthenticated: true,
-      user
+      user,
+      token,
+      access_token
     };
   },
   SIGN_UP: (state: State, action: SignUpAction): State => {
@@ -126,16 +138,18 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
   const initialize = useCallback(
     async (): Promise<void> => {
       try {
-        const accessToken = window.localStorage.getItem(STORAGE_KEY);
+        const access_token = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+        const token = JSON.parse(window.localStorage.getItem(TOKEN_KEY) || '');
+        const user: User | null = JSON.parse(window.localStorage.getItem(USER_KEY) || '');
 
-        if (accessToken) {
-          const user: any = await accessToken;
-
+        if (access_token && token && user) {
           dispatch({
             type: ActionType.INITIALIZE,
             payload: {
               isAuthenticated: true,
-              user
+              user,
+              token,
+              access_token
             }
           });
         } else {
@@ -143,7 +157,9 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
             type: ActionType.INITIALIZE,
             payload: {
               isAuthenticated: false,
-              user: null
+              user: null,
+              token: null,
+              access_token: null
             }
           });
         }
@@ -153,7 +169,9 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
           type: ActionType.INITIALIZE,
           payload: {
             isAuthenticated: false,
-            user: null
+            user: null,
+            token: null,
+            access_token: null
           }
         });
       }
@@ -171,12 +189,11 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const signIn = useCallback(
     async (email: string, password: string): Promise<void> => {
-      const { accessToken } = await authApi.signIn({ email, password });
-      const access_token : string | any =  (accessToken as string | any).access_token;
-      const user : any =  (accessToken as string | any).user;
-      const token : any =  (accessToken as string | any).token;
+      const { access_token, user, token }: any = await authApi.signIn({ email, password });
 
-      localStorage.setItem(STORAGE_KEY, (accessToken as string | any).access_token);
+      localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
+      localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
 
       dispatch({
         type: ActionType.SIGN_IN,
@@ -192,10 +209,10 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const signUp = useCallback(
     async (email: string, name: string, password: string): Promise<void> => {
-      const { accessToken } = await authApi.signUp({ email, name, password });
-      const user = await authApi.me({ accessToken });
+      const { access_token } = await authApi.signUp({ email, name, password });
+      const user = await authApi.me({ access_token });
 
-      localStorage.setItem(STORAGE_KEY, accessToken);
+      localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
 
       dispatch({
         type: ActionType.SIGN_UP,
@@ -209,7 +226,9 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const signOut = useCallback(
     async (): Promise<void> => {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(TOKEN_KEY);
       dispatch({ type: ActionType.SIGN_OUT });
     },
     [dispatch]
