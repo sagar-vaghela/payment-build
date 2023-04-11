@@ -25,6 +25,8 @@ import { OverviewJobs } from 'src/sections/dashboard/overview/overview-jobs';
 import { OverviewOpenTickets } from 'src/sections/dashboard/overview/overview-open-tickets';
 import { OverviewTips } from 'src/sections/dashboard/overview/overview-tips';
 import type { Page as PageType } from 'src/types/page';
+import { useEffect } from 'react';
+import { userCurrentAPi } from '../../services/api/index';
 
 const now = new Date();
 
@@ -32,6 +34,14 @@ const Page: PageType = () => {
   const settings = useSettings();
 
   usePageView();
+  
+  useEffect(() => {
+    const callApi = async() => {
+      const response = await userCurrentAPi();
+      console.log('response',response);
+    }
+    callApi();
+  },[])
 
   return (
     <>
