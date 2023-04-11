@@ -27,11 +27,14 @@ import { OverviewTips } from "src/sections/dashboard/overview/overview-tips";
 import type { Page as PageType } from "src/types/page";
 import { useEffect } from "react";
 import { userCurrentAPi } from "../../services/api/index";
+import { useAuth } from "src/hooks/use-auth";
 
 const now = new Date();
 
 const Page: PageType = () => {
   const settings = useSettings();
+  const auth = useAuth();
+
   usePageView();
 
   useEffect(() => {
@@ -39,8 +42,10 @@ const Page: PageType = () => {
       const response = await userCurrentAPi();
       console.log("response", response);
     };
-    callApi();
-  }, []);
+    if(auth?.token?.access_token) {
+      callApi();
+    }
+  }, [auth.token.access_token]);
 
   return (
     <>

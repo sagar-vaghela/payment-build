@@ -1,8 +1,18 @@
 export interface User {
-  id: string;
-  avatar?: string;
-  email?: string;
-  name?: string;
-
-  [key: string]: any;
+  iss: string,
+  aud: string,
+  auth_time: number,
+  user_id: string,
+  sub: string,
+  iat: number,
+  exp: number,
+  email: string,
+  email_verified: boolean,
+  firebase: {
+      identities:Identities,
+      sign_in_provider: string
+  }
+}
+export interface Identities {
+  email: string[]
 }

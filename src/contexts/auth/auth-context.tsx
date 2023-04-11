@@ -9,12 +9,17 @@ const ACCESS_TOKEN_KEY = 'access_token';
 const USER_KEY = 'user';
 const TOKEN_KEY = 'token';
 
+interface Token {
+  access_token : string,
+  expires_in: string,
+  refresh_token: string
+}
 interface State {
   isInitialized: boolean;
   isAuthenticated: boolean;
   user: User | null;
-  access_token: string | null;
-  token: any; // ahi type nakhjo
+  // access_token: string | null;
+  token: Token; // ahi type nakhjo
 }
 
 enum ActionType {
@@ -29,8 +34,8 @@ type InitializeAction = {
   payload: {
     isAuthenticated: boolean;
     user: User | null; // ahi nakhjo types
-    access_token: string | null;
-    token: any // ahi nakhjo types
+    // access_token: string | null;
+    token: Token // ahi nakhjo types
   };
 };
 
@@ -38,8 +43,8 @@ type SignInAction = {
   type: ActionType.SIGN_IN;
   payload: {
     user: User; // ahi nakhjo types
-    access_token: string;
-    token: any // ahi nakhjo types
+    // access_token: string;
+    token: Token // ahi nakhjo types
   };
 };
 
@@ -66,8 +71,12 @@ const initialState: State = {
   isAuthenticated: false,
   isInitialized: false,
   user: null,
-  token: null,
-  access_token: null
+  token: {
+    access_token: '',
+    expires_in:'',
+    refresh_token :''
+  },
+  // access_token: null
 };
 
 const handlers: Record<ActionType, Handler> = {
@@ -82,14 +91,13 @@ const handlers: Record<ActionType, Handler> = {
     };
   },
   SIGN_IN: (state: State, action: SignInAction): State => {
-    const { user, token, access_token } = action.payload;
+    const { user, token } = action.payload;
 
     return {
       ...state,
       isAuthenticated: true,
       user,
       token,
-      access_token
     };
   },
   SIGN_UP: (state: State, action: SignUpAction): State => {
@@ -149,7 +157,6 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
               isAuthenticated: true,
               user,
               token,
-              access_token
             }
           });
         } else {
@@ -158,8 +165,11 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
             payload: {
               isAuthenticated: false,
               user: null,
-              token: null,
-              access_token: null
+              token: {
+                access_token: '',
+                expires_in:'',
+                refresh_token :''
+              },
             }
           });
         }
@@ -170,8 +180,11 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
           payload: {
             isAuthenticated: false,
             user: null,
-            token: null,
-            access_token: null
+            token: {
+              access_token: '',
+              expires_in:'',
+              refresh_token :''
+            },
           }
         });
       }
@@ -198,7 +211,6 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
       dispatch({
         type: ActionType.SIGN_IN,
         payload: {
-          access_token,
           user,
           token
         }
