@@ -1,8 +1,8 @@
 import type { User } from 'src/types/user';
 import { createResourceId } from 'src/utils/create-resource-id';
-import { decode, JWT_EXPIRES_IN, JWT_SECRET, sign } from 'src/utils/jwt';
 import { wait } from 'src/utils/wait';
 import { users } from './data';
+import { createAxiosFor } from 'src/services/axios';
 
 const STORAGE_KEY: string = 'users';
 
@@ -61,40 +61,68 @@ type MeResponse = Promise<User>;
 
 class AuthApi {
   async signIn(request: SignInRequest): SignInResponse {
-    const { email, password } = request;
+    const payload = {
+      ...request,
+      rememberMe: false
+    }
 
-    await wait(500);
 
     return new Promise((resolve, reject) => {
       try {
-        // Merge static users (data file) with persisted users (browser storage)
-        const mergedUsers = [
-          ...users,
-          ...getPersistedUsers()
-        ];
+        createAxiosFor.post(`https://europe-west1-tipsterpage-1a852.cloudfunctions.net/apiv1/auth/login`,payload).then(function (response) {
+          const { payload: user, token} = response.data;
+          // Create the access token
+          const accessToken: any = {
+            user, token, access_token: token.access_token
+          };
 
-        // Find the user
-        const user = mergedUsers.find((user) => user.email === email);
+          // const accessToken: any = token.access_token;
 
-        if (!user || (user.password !== password)) {
-          reject(new Error('Please check your email and password'));
-          return;
-        }
+          resolve({ accessToken });
+        })
 
-        // Create the access token
-        const accessToken = sign(
-          { userId: user.id },
-          JWT_SECRET,
-          { expiresIn: JWT_EXPIRES_IN }
-        );
-
-        resolve({ accessToken });
       } catch (err) {
         console.error('[Auth Api]: ', err);
         reject(new Error('Internal server error'));
       }
     });
   }
+ 
+  // async signIn(request: SignInRequest): SignInResponse {
+  //   const { email, password } = request;
+
+  //   await wait(500);
+
+  //   return new Promise((resolve, reject) => {
+  //     try {
+  //       // Merge static users (data file) with persisted users (browser storage)
+  //       const mergedUsers = [
+  //         ...users,
+  //         ...getPersistedUsers()
+  //       ];
+
+  //       // Find the user
+  //       const user = mergedUsers.find((user) => user.email === email);
+
+  //       if (!user || (user.password !== password)) {
+  //         reject(new Error('Please check your email and password'));
+  //         return;
+  //       }
+
+  //       // Create the access token
+  //       const accessToken = sign(
+  //         { userId: user.id },
+  //         JWT_SECRET,
+  //         { expiresIn: JWT_EXPIRES_IN }
+  //       );
+
+  //       resolve({ accessToken });
+  //     } catch (err) {
+  //       console.error('[Auth Api]: ', err);
+  //       reject(new Error('Internal server error'));
+  //     }
+  //   });
+  // }
 
   async signUp(request: SignUpRequest): SignUpResponse {
     const { email, name, password } = request;
@@ -128,50 +156,13 @@ class AuthApi {
 
         persistUser(user);
 
-        const accessToken = sign(
-          { userId: user.id },
-          JWT_SECRET,
-          { expiresIn: JWT_EXPIRES_IN }
-        );
+        // const accessToken = sign(
+        //   { userId: user.id },
+        //   JWT_SECRET,
+        //   { expiresIn: JWT_EXPIRES_IN }
+        // );
 
-        resolve({ accessToken });
-      } catch (err) {
-        console.error('[Auth Api]: ', err);
-        reject(new Error('Internal server error'));
-      }
-    });
-  }
-
-  me(request: MeRequest): MeResponse {
-    const { accessToken } = request;
-
-    return new Promise((resolve, reject) => {
-      try {
-        // Decode access token
-        const decodedToken = decode(accessToken) as any;
-
-        // Merge static users (data file) with persisted users (browser storage)
-        const mergedUsers = [
-          ...users,
-          ...getPersistedUsers()
-        ];
-
-        // Find the user
-        const { userId } = decodedToken;
-        const user = mergedUsers.find((user) => user.id === userId);
-
-        if (!user) {
-          reject(new Error('Invalid authorization token'));
-          return;
-        }
-
-        resolve({
-          id: user.id,
-          avatar: user.avatar,
-          email: user.email,
-          name: user.name,
-          plan: user.plan
-        });
+        resolve({ accessToken: '' });
       } catch (err) {
         console.error('[Auth Api]: ', err);
         reject(new Error('Internal server error'));

@@ -2,7 +2,6 @@ import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import {
   Alert,
-  Box,
   Button,
   Card,
   CardContent,
@@ -15,13 +14,12 @@ import {
 } from '@mui/material';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
-import type { AuthContextType } from 'src/contexts/auth/amplify-context';
+import type { AuthContextType } from 'src/contexts/auth/auth-context';
 import { GuestGuard } from 'src/guards/guest-guard';
 import { IssuerGuard } from 'src/guards/issuer-guard';
 import { useAuth } from 'src/hooks/use-auth';
 import { useMounted } from 'src/hooks/use-mounted';
 import { usePageView } from 'src/hooks/use-page-view';
-import { useRouter } from 'src/hooks/use-router';
 import { useSearchParams } from 'src/hooks/use-search-params';
 import { Layout as AuthLayout } from 'src/layouts/auth/classic-layout';
 import { paths } from 'src/paths';
@@ -46,12 +44,15 @@ const validationSchema = Yup.object({
     .string()
     .email('Must be a valid email')
     .max(255)
-    .required('Email is required')
+    .required('Email is required'),
+  password: Yup
+    .string()
+    .max(255)
+    .required('Password is required')
 });
 
 const Page: PageType = () => {
   const isMounted = useMounted();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo');
   const { issuer, signIn } = useAuth<AuthContextType>();
@@ -70,13 +71,6 @@ const Page: PageType = () => {
         console.error(err);
 
         if (isMounted()) {
-          if (err.code === 'UserNotConfirmedException') {
-            const searchParams = new URLSearchParams({ username: values.email }).toString();
-            const href = paths.auth.amplify.confirmRegister + `?${searchParams}`;
-            router.push(href);
-            return;
-          }
-
           helpers.setStatus({ success: false });
           helpers.setErrors({ submit: err.message });
           helpers.setSubmitting(false);
@@ -102,7 +96,7 @@ const Page: PageType = () => {
                 &nbsp;
                 <Link
                   component={RouterLink}
-                  href={paths.auth.amplify.register}
+                  href={paths.auth.register}
                   underline="hover"
                   variant="subtitle2"
                 >
@@ -161,22 +155,6 @@ const Page: PageType = () => {
               >
                 Log In
               </Button>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  mt: 3
-                }}
-              >
-                <Link
-                  component={RouterLink}
-                  href={paths.auth.amplify.forgotPassword}
-                  underline="hover"
-                  variant="subtitle2"
-                >
-                  Forgot password?
-                </Link>
-              </Box>
             </form>
           </CardContent>
         </Card>
@@ -197,7 +175,7 @@ const Page: PageType = () => {
 };
 
 Page.getLayout = (page) => (
-  <IssuerGuard issuer={Issuer.Amplify}>
+  <IssuerGuard issuer={Issuer.Auth}>
     <GuestGuard>
       <AuthLayout>
         {page}

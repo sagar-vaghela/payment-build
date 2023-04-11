@@ -1,24 +1,11 @@
 import type { FC, ReactNode } from 'react';
 import { createContext, useCallback, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { Auth0Client } from '@auth0/auth0-spa-js';
-import { auth0Config } from 'src/config';
-import { paths } from 'src/paths';
+import { authApi } from 'src/api/auth';
 import type { User } from 'src/types/user';
 import { Issuer } from 'src/utils/auth';
 
-const auth0Client: Auth0Client = new Auth0Client({
-  domain: auth0Config.issuer_base_url!,
-  clientId: auth0Config.client_id!,
-  cacheLocation: 'localstorage',
-  authorizationParams: {
-    redirect_uri: auth0Config.base_url + paths.auth.auth0.callback
-  }
-});
-
-type AppState = {
-  returnTo?: string;
-};
+const STORAGE_KEY = 'accessToken';
 
 interface State {
   isInitialized: boolean;
@@ -28,8 +15,9 @@ interface State {
 
 enum ActionType {
   INITIALIZE = 'INITIALIZE',
-  LOGIN = 'LOGIN',
-  LOGOUT = 'LOGOUT',
+  SIGN_IN = 'SIGN_IN',
+  SIGN_UP = 'SIGN_UP',
+  SIGN_OUT = 'SIGN_OUT'
 }
 
 type InitializeAction = {
@@ -40,21 +28,29 @@ type InitializeAction = {
   };
 };
 
-type LoginAction = {
-  type: ActionType.LOGIN;
+type SignInAction = {
+  type: ActionType.SIGN_IN;
   payload: {
     user: User;
   };
 };
 
-type LogoutAction = {
-  type: ActionType.LOGOUT;
-}
+type SignUpAction = {
+  type: ActionType.SIGN_UP;
+  payload: {
+    user: User;
+  };
+};
+
+type SignOutAction = {
+  type: ActionType.SIGN_OUT;
+};
 
 type Action =
   | InitializeAction
-  | LoginAction
-  | LogoutAction;
+  | SignInAction
+  | SignUpAction
+  | SignOutAction;
 
 type Handler = (state: State, action: any) => State;
 
@@ -75,7 +71,7 @@ const handlers: Record<ActionType, Handler> = {
       user
     };
   },
-  LOGIN: (state: State, action: LoginAction): State => {
+  SIGN_IN: (state: State, action: SignInAction): State => {
     const { user } = action.payload;
 
     return {
@@ -84,7 +80,16 @@ const handlers: Record<ActionType, Handler> = {
       user
     };
   },
-  LOGOUT: (state: State): State => ({
+  SIGN_UP: (state: State, action: SignUpAction): State => {
+    const { user } = action.payload;
+
+    return {
+      ...state,
+      isAuthenticated: true,
+      user
+    };
+  },
+  SIGN_OUT: (state: State): State => ({
     ...state,
     isAuthenticated: false,
     user: null
@@ -96,18 +101,18 @@ const reducer = (state: State, action: Action): State => (
 );
 
 export interface AuthContextType extends State {
-  issuer: Issuer.Auth0;
-  loginWithRedirect: (appState?: AppState) => Promise<void>;
-  handleRedirectCallback: () => Promise<AppState | undefined>;
-  logout: () => Promise<void>;
+  issuer: Issuer.Auth;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, name: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   ...initialState,
-  issuer: Issuer.Auth0,
-  loginWithRedirect: () => Promise.resolve(),
-  handleRedirectCallback: () => Promise.resolve(undefined),
-  logout: () => Promise.resolve()
+  issuer: Issuer.Auth,
+  signIn: () => Promise.resolve(),
+  signUp: () => Promise.resolve(),
+  signOut: () => Promise.resolve()
 });
 
 interface AuthProviderProps {
@@ -121,35 +126,23 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
   const initialize = useCallback(
     async (): Promise<void> => {
       try {
-        await auth0Client.checkSession();
+        const accessToken = window.localStorage.getItem(STORAGE_KEY);
 
-        const isAuthenticated = await auth0Client.isAuthenticated();
-
-        if (isAuthenticated) {
-          const user = await auth0Client.getUser();
-
-          // Here you should extract the complete user profile to make it
-          // available in your entire app.
-          // The auth state only provides basic information.
+        if (accessToken) {
+          const user: any = await accessToken;
 
           dispatch({
             type: ActionType.INITIALIZE,
             payload: {
-              isAuthenticated,
-              user: {
-                id: user!.sub as string,
-                avatar: user!.picture,
-                email: user!.email as string,
-                name: 'Anika Visser',
-                plan: 'Premium'
-              }
+              isAuthenticated: true,
+              user
             }
           });
         } else {
           dispatch({
             type: ActionType.INITIALIZE,
             payload: {
-              isAuthenticated,
+              isAuthenticated: false,
               user: null
             }
           });
@@ -176,59 +169,60 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     []
   );
 
-  const loginWithRedirect = useCallback(
-    async (appState?: AppState): Promise<void> => {
-      await auth0Client!.loginWithRedirect({
-        appState
-      });
-    },
-    []
-  );
+  const signIn = useCallback(
+    async (email: string, password: string): Promise<void> => {
+      const { accessToken } = await authApi.signIn({ email, password });
+      const access_token : string | any =  (accessToken as string | any).access_token;
+      const user : any =  (accessToken as string | any).user;
+      const token : any =  (accessToken as string | any).token;
 
-  const handleRedirectCallback = useCallback(
-    async (): Promise<AppState | undefined> => {
-      const result = await auth0Client!.handleRedirectCallback();
-      const user = await auth0Client!.getUser();
-
-      // Here you should extract the complete user profile to make it available in your entire app.
-      // The auth state only provides basic information.
+      localStorage.setItem(STORAGE_KEY, (accessToken as string | any).access_token);
 
       dispatch({
-        type: ActionType.LOGIN,
+        type: ActionType.SIGN_IN,
         payload: {
-          user: {
-            id: user!.sub as string,
-            avatar: user!.picture,
-            email: user!.email as string,
-            name: 'Anika Visser',
-            plan: 'Premium'
-          }
+          access_token,
+          user,
+          token
         }
       });
-
-      return result.appState;
     },
-    []
+    [dispatch]
   );
 
-  const logout = useCallback(
-    async (): Promise<void> => {
-      await auth0Client!.logout();
+  const signUp = useCallback(
+    async (email: string, name: string, password: string): Promise<void> => {
+      const { accessToken } = await authApi.signUp({ email, name, password });
+      const user = await authApi.me({ accessToken });
+
+      localStorage.setItem(STORAGE_KEY, accessToken);
+
       dispatch({
-        type: ActionType.LOGOUT
+        type: ActionType.SIGN_UP,
+        payload: {
+          user
+        }
       });
     },
-    []
+    [dispatch]
+  );
+
+  const signOut = useCallback(
+    async (): Promise<void> => {
+      localStorage.removeItem(STORAGE_KEY);
+      dispatch({ type: ActionType.SIGN_OUT });
+    },
+    [dispatch]
   );
 
   return (
     <AuthContext.Provider
       value={{
         ...state,
-        issuer: Issuer.Auth0,
-        loginWithRedirect,
-        handleRedirectCallback,
-        logout
+        issuer: Issuer.Auth,
+        signIn,
+        signUp,
+        signOut
       }}
     >
       {children}

@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
-import type { AuthContextType } from 'src/contexts/auth/jwt-context';
+import type { AuthContextType } from 'src/contexts/auth/auth-context';
 import { GuestGuard } from 'src/guards/guest-guard';
 import { IssuerGuard } from 'src/guards/issuer-guard';
 import { useAuth } from 'src/hooks/use-auth';
@@ -109,7 +109,7 @@ const Page: PageType = () => {
                 &nbsp;
                 <Link
                   component={RouterLink}
-                  href={paths.auth.jwt.login}
+                  href={paths.auth.login}
                   underline="hover"
                   variant="subtitle2"
                 >
@@ -221,7 +221,7 @@ const Page: PageType = () => {
 };
 
 Page.getLayout = (page) => (
-  <IssuerGuard issuer={Issuer.JWT}>
+  <IssuerGuard issuer={Issuer.Auth}>
     <GuestGuard>
       <AuthLayout>
         {page}
