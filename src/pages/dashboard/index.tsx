@@ -28,6 +28,7 @@ import type { Page as PageType } from "src/types/page";
 import { useEffect } from "react";
 import { userCurrentAPi } from "../../services/api/index";
 import { useAuth } from "src/hooks/use-auth";
+import { toast } from "react-hot-toast";
 
 const now = new Date();
 
@@ -40,7 +41,16 @@ const Page: PageType = () => {
   useEffect(() => {
     const callApi = async () => {
       const response = await userCurrentAPi();
-      console.log("response", response);
+      console.log("userCurrentAPi---response---", response);
+
+      // await userCurrentAPi().then(function (response) {
+      // console.log("response", response);
+      // toast.success('userCurrentAPI Successfull');
+
+      // }).catch(function (error) {
+      //   toast.error(error.message);
+      // });
+
     };
     if(auth?.token?.access_token) {
       callApi();

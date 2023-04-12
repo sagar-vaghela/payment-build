@@ -3,7 +3,8 @@ import { createResourceId } from 'src/utils/create-resource-id';
 import { wait } from 'src/utils/wait';
 import { users } from './data';
 import { createAxiosFor } from 'src/services/axios';
-import { loginUrl } from 'src/services/api';
+import { loginApi } from 'src/services/api';
+import { toast } from 'react-hot-toast';
 
 const ACCESS_TOKEN_KEY = 'access_token';
 const USER_KEY = 'user';
@@ -71,12 +72,14 @@ class AuthApi {
 
     return new Promise((resolve, reject) => {
       try {
-        // ane fix karo like below je error ave che
-        // createAxiosFor.post(loginUrl, payload).then(function (response) {
-        createAxiosFor.post(`https://europe-west1-tipsterpage-1a852.cloudfunctions.net/apiv1/auth/login`,payload).then(function (response) {
+        loginApi(payload).then(function (response) {
           const { payload: user, token, token: { access_token }}: any = response.data;
           resolve({ user, token, access_token });
+          toast.success('Login Successfull');
         })
+        .catch(function (error) {
+            toast.error(error.message);
+        });
 
       } catch (err) {
         console.error('[Auth Api]: ', err);
