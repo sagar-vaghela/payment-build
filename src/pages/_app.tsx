@@ -117,7 +117,7 @@ const App = (props: AppProps) => {
                                   </>
                                 )
                             }
-                            {/* <Toaster /> */}
+                            <Toaster />
                           </RTL>
                         </ThemeProvider>
                       );
