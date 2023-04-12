@@ -147,8 +147,8 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     async (): Promise<void> => {
       try {
         const access_token = window.localStorage.getItem(ACCESS_TOKEN_KEY);
-        const token = JSON.parse(window.localStorage.getItem(TOKEN_KEY) || '');
-        const user: User | null = JSON.parse(window.localStorage.getItem(USER_KEY) || '');
+        const token = window.localStorage.getItem(TOKEN_KEY) ? JSON.parse(window.localStorage.getItem(TOKEN_KEY) || '') : '';
+        const user: User | null =  window.localStorage.getItem(USER_KEY) ? JSON.parse(window.localStorage.getItem(USER_KEY) || '') : '';
 
         if (access_token && token && user) {
           dispatch({
