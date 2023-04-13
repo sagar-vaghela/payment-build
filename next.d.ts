@@ -9,7 +9,6 @@ declare module 'next' {
     getLayout?: (page: ReactElement) => ReactNode;
   }
 }
-
 declare module 'next/app' {
   export declare type AppProps<P = any> = AppPropsType<Router, P> & {
     Component: NextPage;
