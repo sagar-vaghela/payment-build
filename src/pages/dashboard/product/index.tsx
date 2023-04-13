@@ -173,12 +173,13 @@ const Page: PageType = () => {
                                     <TableHead>
                                         <TableRow>
                                             {
-                                                tableHeader.map((item) => {
+                                                tableHeader.map((item, i) => {
 
                                                     if (item.label === 'Name') {
                                                         return (
-                                                            <TableCell>
-                                                                <span className='cursor-pointer' onClick={() => { setSortKey(item.key); sortData(item.key, 'en_EN') }}>
+                                                            <TableCell key={i}>
+                                                                <span className='cursor-pointer'
+onClick={() => { setSortKey(item.key); sortData(item.key, 'en_EN') }}>
                                                                     {item.label}{sortKey === item.key &&
                                                                         <span className='cursor-pointer'>{sortOrder === 'asc' ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}</span>}
                                                                 </span>
@@ -187,8 +188,9 @@ const Page: PageType = () => {
                                                     }
                                                     else {
                                                         return (
-                                                            <TableCell>
-                                                                <span className='cursor-pointer' onClick={() => { setSortKey(item.key); sortData(item.key, '') }}>
+                                                            <TableCell key={i}>
+                                                                <span className='cursor-pointer'
+onClick={() => { setSortKey(item.key); sortData(item.key, '') }}>
                                                                     {item.label}{sortKey === item.key &&
                                                                         <span className='cursor-pointer'>{sortOrder === 'asc' ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}</span>}
                                                                 </span>
@@ -203,7 +205,8 @@ const Page: PageType = () => {
                                     <TableBody>
                                         {productActiveList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item: Product, index: number) => {
                                             return (
-                                                <TableRow key={index} hover>
+                                                <TableRow key={index}
+hover>
 
                                                     <TableCell>
                                                         {item.nombre.en_EN}

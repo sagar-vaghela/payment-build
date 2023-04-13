@@ -25,7 +25,6 @@ interface State {
 enum ActionType {
   INITIALIZE = 'INITIALIZE',
   SIGN_IN = 'SIGN_IN',
-  SIGN_UP = 'SIGN_UP',
   SIGN_OUT = 'SIGN_OUT'
 }
 
@@ -48,13 +47,6 @@ type SignInAction = {
   };
 };
 
-type SignUpAction = {
-  type: ActionType.SIGN_UP;
-  payload: {
-    user: User;
-  };
-};
-
 type SignOutAction = {
   type: ActionType.SIGN_OUT;
 };
@@ -62,7 +54,6 @@ type SignOutAction = {
 type Action =
   | InitializeAction
   | SignInAction
-  | SignUpAction
   | SignOutAction;
 
 type Handler = (state: State, action: any) => State;
@@ -100,15 +91,6 @@ const handlers: Record<ActionType, Handler> = {
       token,
     };
   },
-  SIGN_UP: (state: State, action: SignUpAction): State => {
-    const { user } = action.payload;
-
-    return {
-      ...state,
-      isAuthenticated: true,
-      user
-    };
-  },
   SIGN_OUT: (state: State): State => ({
     ...state,
     isAuthenticated: false,
@@ -123,7 +105,6 @@ const reducer = (state: State, action: Action): State => (
 export interface AuthContextType extends State {
   issuer: Issuer.Auth;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, name: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -131,7 +112,6 @@ export const AuthContext = createContext<AuthContextType>({
   ...initialState,
   issuer: Issuer.Auth,
   signIn: () => Promise.resolve(),
-  signUp: () => Promise.resolve(),
   signOut: () => Promise.resolve()
 });
 
@@ -219,23 +199,6 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     [dispatch]
   );
 
-  const signUp = useCallback(
-    async (email: string, name: string, password: string): Promise<void> => {
-      const { access_token } = await authApi.signUp({ email, name, password });
-      const user = await authApi.me({ access_token });
-
-      localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
-
-      dispatch({
-        type: ActionType.SIGN_UP,
-        payload: {
-          user
-        }
-      });
-    },
-    [dispatch]
-  );
-
   const signOut = useCallback(
     async (): Promise<void> => {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -252,7 +215,6 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
         ...state,
         issuer: Issuer.Auth,
         signIn,
-        signUp,
         signOut
       }}
     >

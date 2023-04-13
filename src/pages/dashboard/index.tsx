@@ -77,12 +77,15 @@ const Page: PageType = () => {
             }}
           >
             <Grid xs={12}>
-              <Stack direction="row" justifyContent="space-between" spacing={4}>
+              <Stack direction="row"
+justifyContent="space-between"
+spacing={4}>
                 <div>
                   <Typography variant="h4">Overview</Typography>
                 </div>
                 <div>
-                  <Stack direction="row" spacing={4}>
+                  <Stack direction="row"
+spacing={4}>
                     <Button
                       startIcon={
                         <SvgIcon>
@@ -97,19 +100,24 @@ const Page: PageType = () => {
                 </div>
               </Stack>
             </Grid>
-            <Grid xs={12} md={4}>
+            <Grid xs={12}
+md={4}>
               <OverviewDoneTasks amount={31} />
             </Grid>
-            <Grid xs={12} md={4}>
+            <Grid xs={12}
+md={4}>
               <OverviewPendingIssues amount={12} />
             </Grid>
-            <Grid xs={12} md={4}>
+            <Grid xs={12}
+md={4}>
               <OverviewOpenTickets amount={5} />
             </Grid>
-            <Grid xs={12} md={7}>
+            <Grid xs={12}
+md={7}>
               <OverviewBanner />
             </Grid>
-            <Grid xs={12} md={5}>
+            <Grid xs={12}
+md={5}>
               <OverviewTips
                 sx={{ height: "100%" }}
                 tips={[
@@ -129,7 +137,8 @@ const Page: PageType = () => {
                 ]}
               />
             </Grid>
-            <Grid xs={12} md={7}>
+            <Grid xs={12}
+md={7}>
               <OverviewSubscriptionUsage
                 chartSeries={[
                   {
@@ -143,7 +152,8 @@ const Page: PageType = () => {
                 ]}
               />
             </Grid>
-            <Grid xs={12} md={5}>
+            <Grid xs={12}
+md={5}>
               <OverviewInbox
                 messages={[
                   {
@@ -189,7 +199,8 @@ const Page: PageType = () => {
                 ]}
               />
             </Grid>
-            <Grid xs={12} md={7}>
+            <Grid xs={12}
+md={7}>
               <OverviewTransactions
                 transactions={[
                   {
@@ -231,7 +242,8 @@ const Page: PageType = () => {
                 ]}
               />
             </Grid>
-            <Grid xs={12} md={5}>
+            <Grid xs={12}
+md={5}>
               <OverviewEvents
                 events={[
                   {
