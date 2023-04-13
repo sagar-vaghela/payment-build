@@ -59,6 +59,10 @@ export const CustomerListTable: FC<CustomerListTableProps> = (props) => {
   const selectedAll = (items.length > 0) && (selected.length === items.length);
   const enableBulkActions = selected.length > 0;
 
+  console.log("selected", selected);
+  console.log("items", items);
+  
+
   return (
     <Box sx={{ position: 'relative' }}>
       {enableBulkActions && (
