@@ -67,6 +67,9 @@ const useCustomersSearch = () => {
 
   const handlePageChange = useCallback(
     (event: MouseEvent<HTMLButtonElement> | null, page: number): void => {
+
+      console.log("page----",page);
+      
       setState((prevState) => ({
         ...prevState,
         page
@@ -111,6 +114,9 @@ const useCustomersStore = (searchState: CustomersSearchState) => {
       try {
         const response = await customersApi.getCustomers(searchState);
 
+        console.log("response.data======",response.data);
+        
+
         if (isMounted()) {
           setState({
             customers: response.data,
@@ -153,6 +159,9 @@ const Page: PageType = () => {
   const customersSelection = useSelection<string>(customersIds);
 
   usePageView();
+
+  console.log("customers=====",customersStore.customers);
+  
 
   return (
     <>
