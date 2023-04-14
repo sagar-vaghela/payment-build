@@ -14,7 +14,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { toast } from 'react-hot-toast';
 import EditProduct from './EditProduct';
 import EliminateProduct from './EliminateProduct';
-import { Product } from './product.types';
+import { Product } from '../../../types/product.types';
 
 const style = {
     position: 'absolute' as 'absolute',
