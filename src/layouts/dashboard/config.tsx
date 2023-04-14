@@ -41,7 +41,7 @@ export interface Item {
 }
 
 export interface Section {
-  items: Item[];
+  items: any;
   subheader?: string;
 }
 

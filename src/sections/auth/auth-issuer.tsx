@@ -2,9 +2,9 @@ import type { FC } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { paths } from 'src/paths';
-import { Issuer } from 'src/utils/auth';
+import { Issue, Issuer } from 'src/utils/auth';
 
-const issuers: Record<Issuer, string> = {
+const issuers: Record<Issue, string> = {
   Amplify: '/assets/logos/logo-amplify.svg',
   Auth0: '/assets/logos/logo-auth0.svg',
   Firebase: '/assets/logos/logo-firebase.svg',
@@ -54,7 +54,7 @@ export const AuthIssuer: FC<AuthPlatformProps> = (props) => {
       >
         {Object.keys(issuers).map((issuer) => {
           const isCurrent = issuer === currentIssuer;
-          const icon = issuers[issuer as Issuer];
+          const icon = issuers[issuer as Issue];
 
           return (
             <Tooltip

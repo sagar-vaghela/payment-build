@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
-import { ActionType, type AuthContextType } from 'src/contexts/auth/auth-context';
+import { type AuthContextType } from 'src/contexts/auth/auth-context';
 import { GuestGuard } from 'src/guards/guest-guard';
 import { IssuerGuard } from 'src/guards/issuer-guard';
 import { useAuth } from 'src/hooks/use-auth';

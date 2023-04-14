@@ -13,6 +13,7 @@ interface LayoutProps {
 export const Layout: FC<LayoutProps> = withAuthGuard((props) => {
   const settings = useSettings();
   const sections = useSections();
+console.log("sections--------->>>>>",sections);
 
   if (settings.layout === 'horizontal') {
     return (

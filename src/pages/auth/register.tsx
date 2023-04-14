@@ -68,13 +68,13 @@ const Page: PageType = () => {
   const isMounted = useMounted();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo');
-  const { issuer, signUp } = useAuth<AuthContextType>();
+  const { issuer} = useAuth<AuthContextType>();
   const formik = useFormik({
     initialValues,
     validationSchema,
     onSubmit: async (values, helpers): Promise<void> => {
       try {
-        await signUp(values.email, values.name, values.password);
+        // await signUp(values.email, values.name, values.password);
 
         if (isMounted()) {
           // returnTo could be an absolute path
